@@ -5,7 +5,7 @@ import { Configuration, OpenAIApi } from 'openai';
 // Initialize the OpenAI API with your API key and organization ID
 const configuration = new Configuration({
     organization: 'org-wEpafSfteEnh60A3ARvZoZVL',
-    apiKey: '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',
+    apiKey: 'YourAPIKey',
 });
 
 const openai = new OpenAIApi(configuration);
