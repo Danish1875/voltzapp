@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { Configuration, OpenAIApi } from 'openai';
 
+// Initialize the OpenAI API with your API key and organization ID
+const configuration = new Configuration({
+    organization: 'org-wEpafSfteEnh60A3ARvZoZVL',
+    apiKey: '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',
+});
 
+const openai = new OpenAIApi(configuration);
 const ChatbotContainer = styled.div`
   position: fixed;
   bottom: 20px;
@@ -53,22 +60,40 @@ const Chatbot = () => {
         setInputValue(event.target.value);
     };
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (inputValue.trim() === '') return;
 
-        // Your logic to handle the user's message and provide responses.
-        // Here, you can check if the input matches any of the car names, and if it does, provide the specs for that car.
-        // Otherwise, respond with a generic message like "Sorry, I don't have information about that car."
-
-        // Example logic:
-        const cars = ['car1', 'car2', 'car3', 'car4', 'car5'];
-        if (cars.includes(inputValue.toLowerCase())) {
-            // Respond with car specs (replace this with the actual specs for each car)
-            setMessages([...messages, { type: 'bot', text: `Here are the specs for ${inputValue}: ...` }]);
-        } else {
-            // Respond with a generic message
-            setMessages([...messages, { type: 'bot', text: "Sorry, I don't have information about that car." }]);
-        }
+        const cars = {
+            car1: 'Car1 is a stylish sedan with excellent fuel efficiency.',
+            car2: 'Car2 is a powerful SUV with advanced safety features.',
+            car3: 'Car3 is a compact hatchback known for its agility.',
+            car4: 'Car4 is a luxurious sedan with a comfortable interior.',
+            car5: 'Car5 is a versatile crossover perfect for urban driving.',
+          };
+      
+          const inputCar = inputValue.toLowerCase();
+          if (cars.hasOwnProperty(inputCar)) {
+            // If the input matches a car name, respond with the car's information
+            const botResponse = cars[inputCar];
+            setMessages([...messages, { type: 'bot', text: botResponse }]);
+          } else {
+            // If the input doesn't match a car name, use OpenAI to respond
+            try {
+              const response = await openai.completions.create({
+                engine: 'text-davinci-002', // You can experiment with different engines
+                prompt: inputValue,
+                maxTokens: 100, // Limit the response length
+                stop: ['\n'], // Stop the response after the first line to avoid long paragraphs
+              });
+      
+              const botResponse = response.data.choices[0].text;
+              setMessages([...messages, { type: 'bot', text: botResponse }]);
+            } catch (error) {
+              console.error('Error calling OpenAI API:', error);
+              // Handle the error gracefully
+            }
+          }
+      
 
         setInputValue('');
     };
